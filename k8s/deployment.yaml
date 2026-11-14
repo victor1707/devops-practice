@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devops-practice
+spec:
+  replicas: 1            # TODO (lesson 5): scale to 3, watch pods appear
+  selector:
+    matchLabels: { app: devops-practice }
+  template:
+    metadata:
+      labels: { app: devops-practice }
+    spec:
+      containers:
+        - name: app
+          image: devops-practice:local   # TODO (lesson 5): your image tag
+          ports: [{ containerPort: 8080 }]
+          # TODO (lesson 5): add a readinessProbe on /health
