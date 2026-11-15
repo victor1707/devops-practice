@@ -6,12 +6,14 @@ pipeline {
     }
     stage('Deploy nginx') {
       steps {
-        // kubeconfig is a Jenkins "Secret file" credential, never committed to GitHub
-        withCredentials([file(credentialsId: 'kind-kubeconfig', variable: 'KUBECONFIG')]) {
+        // token = Jenkins "Secret text" credential for the jenkins service account, never committed
+        withCredentials([string(credentialsId: 'kind-lab-token', variable: 'TOKEN')]) {
+          // shortcut: skips TLS check of the lab cluster; for real clusters pass --certificate-authority
           sh '''
-            /snap/bin/kubectl apply -f k8s/nginx.yaml
-            /snap/bin/kubectl wait --for=condition=Ready pod/nginx --timeout=120s
-            /snap/bin/kubectl get pod nginx -o wide
+            K="/snap/bin/kubectl --server=https://192.168.29.170:16444 --token=$TOKEN --insecure-skip-tls-verify"
+            $K apply -f k8s/nginx.yaml
+            $K wait --for=condition=Ready pod/nginx --timeout=120s
+            $K get pod nginx -o wide
           '''
         }
       }
