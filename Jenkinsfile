@@ -8,9 +8,9 @@ pipeline {
       steps {
         // token = Jenkins "Secret text" credential for the jenkins service account, never committed
         withCredentials([string(credentialsId: 'kind-lab-token', variable: 'TOKEN')]) {
-          // shortcut: skips TLS check of the lab cluster; for real clusters pass --certificate-authority
+          // k3s on this same VM. shortcut: skips TLS check of the lab cluster; for real clusters pass --certificate-authority
           sh '''
-            K="/snap/bin/kubectl --server=https://192.168.29.170:16444 --token=$TOKEN --insecure-skip-tls-verify"
+            K="/snap/bin/kubectl --server=https://127.0.0.1:6443 --token=$TOKEN --insecure-skip-tls-verify -n apps"
             $K apply -f k8s/nginx.yaml
             $K wait --for=condition=Ready pod/nginx --timeout=120s
             $K get pod nginx -o wide
